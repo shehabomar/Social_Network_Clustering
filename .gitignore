@@ -5,3 +5,5 @@ results/
 selected\ data/
 test_set_cifs/
 other_files/
+.DS_Store
+
