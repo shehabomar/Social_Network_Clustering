@@ -7,3 +7,6 @@ test_set_cifs/
 other_files/
 .DS_Store
 
+venv/
+Code/mof_clustering_*.err
+Code/mof_clustering_*.out
