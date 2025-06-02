@@ -14,9 +14,43 @@ from collections import defaultdict
 from scipy import sparse
 import multiprocessing as mp
 from functools import partial
+import pickle
+import time
 
 # Default maximum number of neighbors to keep per node (to cap memory)
-DEFAULT_TOP_K = 50
+DEFAULT_TOP_K = 100
+
+def process_batch_chunk(args):
+    """
+    Process a chunk of the batch for parallel computation
+    
+    Args:
+        args: Tuple of (chunk_start, chunk_end, batch_features, all_features, threshold, global_start_idx, mof_ids)
+        
+    Returns:
+        List of edges [(src, dst, weight), ...]
+    """
+    chunk_start, chunk_end, batch_features, all_features, threshold, global_start_idx, mof_ids = args
+    
+    # Calculate similarities for this chunk
+    chunk_features = batch_features[chunk_start:chunk_end]
+    similarities = cosine_similarity(chunk_features, all_features)
+    
+    edges = []
+    for local_idx, sims in enumerate(similarities):
+        global_idx = global_start_idx + chunk_start + local_idx
+        src_id = mof_ids[global_idx]
+        
+        # Find all similarities above threshold
+        valid_indices = np.where(sims >= threshold)[0]
+        
+        for j in valid_indices:
+            if global_idx != j:  # Skip self-loops
+                dst_id = mof_ids[j]
+                weight = float(sims[j])
+                edges.append((src_id, dst_id, weight))
+    
+    return edges
 
 def process_batch(batch_features, all_features, threshold, start_idx, mof_ids):
     """
@@ -88,9 +122,93 @@ def load_and_preprocess_data(file_path, sample_size=None):
     print(f"Preprocessing complete. Data shape: {normalized_df.shape}")
     return normalized_df, id_column
 
-def calculate_similarity_matrix(df, id_column, threshold=0.9, batch_size=10000, top_k=DEFAULT_TOP_K):
+def calculate_similarity_matrix_parallel(df, id_column, threshold=0.9, batch_size=5000, 
+                                       n_jobs=None, top_k=DEFAULT_TOP_K):
     """
-    Calculate the similarity matrix between MOFs and apply threshold using parallel processing
+    Calculate the similarity matrix using parallel processing
+    
+    Args:
+        df: DataFrame with normalized features
+        id_column: Name of the column containing MOF identifiers
+        threshold: Minimum similarity score to keep
+        batch_size: Size of batches for processing
+        n_jobs: Number of parallel jobs (None = use all CPUs)
+        top_k: Maximum number of neighbors to keep per node
+        
+    Returns:
+        Dictionary of {(node1, node2): similarity}
+    """
+    # Extract features
+    feature_columns = [col for col in df.columns if col != id_column]
+    features = df[feature_columns].values.astype(np.float32)
+    mof_ids = df[id_column].values
+    
+    num_samples = len(features)
+    
+    # Determine number of processes
+    if n_jobs is None:
+        n_jobs = mp.cpu_count()
+    
+    print(f"Using {n_jobs} parallel processes")
+    
+    # Temporary storage for all edges
+    adjacency_dict = {}
+    
+    # Process in batches
+    with mp.Pool(processes=n_jobs) as pool:
+        for start_idx in tqdm(range(0, num_samples, batch_size), desc="Similarity batches"):
+            end_idx = min(start_idx + batch_size, num_samples)
+            batch_features = features[start_idx:end_idx]
+            batch_size_actual = end_idx - start_idx
+            
+            # Divide batch into chunks for parallel processing
+            chunk_size = max(1, batch_size_actual // n_jobs)
+            chunks = []
+            
+            for chunk_start in range(0, batch_size_actual, chunk_size):
+                chunk_end = min(chunk_start + chunk_size, batch_size_actual)
+                chunks.append((chunk_start, chunk_end, batch_features, features, 
+                             threshold, start_idx, mof_ids))
+            
+            # Process chunks in parallel
+            chunk_results = pool.map(process_batch_chunk, chunks)
+            
+            # Aggregate results
+            for edges in chunk_results:
+                for src_id, dst_id, weight in edges:
+                    adjacency_dict.setdefault(src_id, []).append((dst_id, weight))
+            
+            # Periodically prune to top_k to manage memory
+            if len(adjacency_dict) > 10000:
+                for src, neighbors in adjacency_dict.items():
+                    if len(neighbors) > top_k:
+                        neighbors.sort(key=lambda x: x[1], reverse=True)
+                        adjacency_dict[src] = neighbors[:top_k]
+    
+    # Final pruning to top_k neighbors per node
+    print("Pruning to top-k neighbors per node...")
+    for src, neighbors in tqdm(adjacency_dict.items(), desc="Pruning"):
+        if len(neighbors) > top_k:
+            neighbors.sort(key=lambda x: x[1], reverse=True)
+            adjacency_dict[src] = neighbors[:top_k]
+    
+    # Convert to edge dictionary without duplicates
+    print("Creating final edge dictionary...")
+    edge_dict = {}
+    for src, neighbors in tqdm(adjacency_dict.items(), desc="Creating edges"):
+        for dst, sim in neighbors:
+            # Ensure consistent edge ordering (smaller ID first)
+            if src < dst:
+                edge_dict[(src, dst)] = sim
+            else:
+                edge_dict[(dst, src)] = sim
+    
+    print(f"Created adjacency matrix with {len(edge_dict)} edges above threshold {threshold}")
+    return edge_dict
+
+def calculate_similarity_matrix(df, id_column, threshold=0.9, batch_size=10000, top_k=DEFAULT_TOP_K, n_jobs=None):
+    """
+    Calculate the similarity matrix between MOFs and apply threshold
     
     Args:
         df: DataFrame with normalized features
@@ -98,10 +216,16 @@ def calculate_similarity_matrix(df, id_column, threshold=0.9, batch_size=10000, 
         threshold: Minimum similarity score to keep
         batch_size: Size of batches for parallel processing
         top_k: Maximum number of neighbors to keep per node
+        n_jobs: Number of parallel jobs (None = single process)
         
     Returns:
         Sparse adjacency matrix as a dictionary of {(node1, node2): similarity}
     """
+    # Use parallel processing if n_jobs is specified
+    if n_jobs and n_jobs > 1:
+        return calculate_similarity_matrix_parallel(df, id_column, threshold, batch_size, n_jobs, top_k)
+    
+    # Original single-process implementation
     # Extract features (all columns except the ID column)
     feature_columns = [col for col in df.columns if col != id_column]
     features = df[feature_columns].values
@@ -149,6 +273,35 @@ def calculate_similarity_matrix(df, id_column, threshold=0.9, batch_size=10000, 
     
     print(f"Created adjacency matrix with {len(edge_dict)} edges above threshold {threshold}")
     return edge_dict
+
+def save_adjacency_matrix(adjacency_dict, output_file):
+    """
+    Save the adjacency matrix to disk
+    
+    Args:
+        adjacency_dict: Dictionary of {(node1, node2): similarity}
+        output_file: Path to save the adjacency matrix
+    """
+    print(f"Saving adjacency matrix to {output_file}...")
+    with open(output_file, 'wb') as f:
+        pickle.dump(adjacency_dict, f, protocol=pickle.HIGHEST_PROTOCOL)
+    print(f"Adjacency matrix saved successfully ({os.path.getsize(output_file) / 1e9:.2f} GB)")
+
+def load_adjacency_matrix(adjacency_file):
+    """
+    Load the adjacency matrix from disk
+    
+    Args:
+        adjacency_file: Path to the saved adjacency matrix
+        
+    Returns:
+        Dictionary of {(node1, node2): similarity}
+    """
+    print(f"Loading adjacency matrix from {adjacency_file}...")
+    with open(adjacency_file, 'rb') as f:
+        adjacency_dict = pickle.load(f)
+    print(f"Loaded adjacency matrix with {len(adjacency_dict)} edges")
+    return adjacency_dict
 
 def build_network(adjacency_dict):
     """
@@ -203,21 +356,30 @@ def detect_communities_girvan_newman(G, num_communities=None):
     """
     print("Detecting communities using Girvan-Newman algorithm...")
     
+    # For large networks, work with the largest connected component
+    if G.number_of_nodes() > 5000:
+        print("Network is large. Using largest connected component only.")
+        largest_cc = max(nx.connected_components(G), key=len)
+        G_sub = G.subgraph(largest_cc).copy()
+        print(f"Working with subgraph of {G_sub.number_of_nodes()} nodes")
+    else:
+        G_sub = G
+    
     # If num_communities is not specified, use modularity to determine optimal number
     if num_communities is None:
-        communities_generator = nx.community.girvan_newman(G)
+        communities_generator = nx.community.girvan_newman(G_sub)
         best_communities = None
         best_modularity = -1
         
         for communities in tqdm(communities_generator):
-            current_modularity = nx.community.modularity(G, communities)
+            current_modularity = nx.community.modularity(G_sub, communities)
             if current_modularity > best_modularity:
                 best_modularity = current_modularity
                 best_communities = communities
             if len(communities) > 20:  # Limit the number of communities
                 break
     else:
-        communities_generator = nx.community.girvan_newman(G)
+        communities_generator = nx.community.girvan_newman(G_sub)
         for i, communities in enumerate(communities_generator):
             if i == num_communities - 1:
                 best_communities = communities
@@ -229,7 +391,15 @@ def detect_communities_girvan_newman(G, num_communities=None):
         for node in community:
             community_dict[node] = i
     
-    print(f"Detected {len(best_communities)} communities using Girvan-Newman")
+    # Add isolated nodes from original graph if we used a subgraph
+    if G.number_of_nodes() > G_sub.number_of_nodes():
+        next_comm_id = len(best_communities)
+        for node in G.nodes():
+            if node not in community_dict:
+                community_dict[node] = next_comm_id
+                next_comm_id += 1
+    
+    print(f"Detected {len(set(community_dict.values()))} communities using Girvan-Newman")
     return community_dict
 
 def analyze_communities(G, communities, df, id_column):
@@ -360,21 +530,63 @@ def main():
     parser.add_argument('--sample', type=int, help='Optional sample size for testing')
     parser.add_argument('--threshold', type=float, default=0.9, help='Similarity threshold (default: 0.9)')
     parser.add_argument('--resolution', type=float, default=1.0, help='Community detection resolution (default: 1.0)')
-    parser.add_argument('--algorithm', choices=['louvain', 'girvan_newman', 'both'], default='both',
+    parser.add_argument('--algorithm', choices=['louvain', 'girvan_newman', 'both', 'none'], default='both',
                       help='Community detection algorithm to use (default: both)')
     parser.add_argument('--batch_size', type=int, default=10000,
                       help='Batch size for parallel processing (default: 10000)')
+    parser.add_argument('--n_jobs', type=int, help='Number of parallel jobs (default: 1)')
+    parser.add_argument('--top_k', type=int, default=100, help='Max neighbors per node (default: 100)')
+    parser.add_argument('--load_adjacency', help='Path to load pre-computed adjacency matrix')
+    parser.add_argument('--save_adjacency', action='store_true', help='Save adjacency matrix for later use')
     
     args = parser.parse_args()
     
     # Create output directory if it doesn't exist
     os.makedirs(args.output_dir, exist_ok=True)
     
-    # Load and preprocess data
-    df, id_column = load_and_preprocess_data(args.input, sample_size=args.sample)
+    # Start timing
+    start_time = time.time()
     
-    # Calculate similarity matrix
-    adjacency_dict = calculate_similarity_matrix(df, id_column, threshold=args.threshold, batch_size=args.batch_size)
+    # Check if we should load adjacency matrix
+    if args.load_adjacency:
+        adjacency_dict = load_adjacency_matrix(args.load_adjacency)
+        # Still need to load data for analysis
+        df, id_column = load_and_preprocess_data(args.input, sample_size=args.sample)
+    else:
+        # Load and preprocess data
+        df, id_column = load_and_preprocess_data(args.input, sample_size=args.sample)
+        
+        # Calculate similarity matrix
+        adjacency_dict = calculate_similarity_matrix(
+            df, id_column, 
+            threshold=args.threshold, 
+            batch_size=args.batch_size,
+            top_k=args.top_k,
+            n_jobs=args.n_jobs
+        )
+        
+        # Save adjacency matrix if requested
+        if args.save_adjacency:
+            adjacency_file = os.path.join(args.output_dir, f'adjacency_matrix_threshold_{args.threshold}.pkl')
+            save_adjacency_matrix(adjacency_dict, adjacency_file)
+            
+            # Save metadata
+            metadata = {
+                'num_nodes': len(df),
+                'num_edges': len(adjacency_dict),
+                'threshold': args.threshold,
+                'id_column': id_column,
+                'processing_time': time.time() - start_time
+            }
+            metadata_file = os.path.join(args.output_dir, f'adjacency_matrix_metadata_{args.threshold}.pkl')
+            with open(metadata_file, 'wb') as f:
+                pickle.dump(metadata, f)
+    
+    # If algorithm is 'none', we're done (only calculating similarity matrix)
+    if args.algorithm == 'none':
+        print(f"\nSimilarity matrix calculation completed.")
+        print(f"Total processing time: {(time.time() - start_time) / 3600:.2f} hours")
+        return
     
     # Build network
     G = build_network(adjacency_dict)
@@ -402,6 +614,7 @@ def main():
         save_community_analysis(gn_stats, 
                               os.path.join(args.output_dir, 'girvan_newman_community_analysis.csv'))
     
+    print(f"\nTotal processing time: {(time.time() - start_time) / 3600:.2f} hours")
     print("MOF Social Network Clustering completed successfully!")
 
 if __name__ == "__main__":
