@@ -1,0 +1,72 @@
+=============================================================
+MOF COMMUNITY NETWORK ANALYSIS JOB STARTED: Fri Jun 13 00:10:53 +04 2025
+Running on node: cn120
+Working directory: /scratch/oms7891/Social_Network_Clustering/Code
+Requested CPUs      : 16
+=============================================================
+Threading limits set to 1 to avoid BLAS oversubscription
+Launching run_community_analysis.py ...
+Using Python: /share/apps/NYUAD5/miniconda/3-4.11.0/bin/python
+============================================================
+FIXED MOF COMMUNITY NETWORK ANALYSIS
+============================================================
+Environment configured with threading limits:
+  OMP_NUM_THREADS: 1
+  OPENBLAS_NUM_THREADS: 1
+  Python path: /share/apps/NYUAD5/miniconda/3-4.11.0/bin
+Checking Python dependencies...
+✓ Core packages available
+✓ All input files found
+Starting community network analysis...
+Command: /share/apps/NYUAD5/miniconda/3-4.11.0/bin/python /scratch/oms7891/Social_Network_Clustering/Code/community_network_analysis.py --adjacency_matrix /scratch/oms7891/Social_Network_Clustering/results/adjacency_matrix_threshold_0.9.pkl --metadata /scratch/oms7891/Social_Network_Clustering/results/adjacency_matrix_metadata_0.9.pkl --data_file /scratch/oms7891/selected data/selected_data.csv --output_dir /scratch/oms7891/Social_Network_Clustering/community_analysis_results --resolution 1.0
+------------------------------------------------------------
+Loading adjacency matrix from /scratch/oms7891/Social_Network_Clustering/results/adjacency_matrix_threshold_0.9.pkl...
+Loaded adjacency matrix with 1,844,998 edges
+Loading metadata from /scratch/oms7891/Social_Network_Clustering/results/adjacency_matrix_metadata_0.9.pkl...
+Dataset info: 258,212 nodes, 1,844,998 edges, threshold=0.9
+Building network graph...
+Network built: 258,212 nodes, 1,844,998 edges
+Detecting communities using enhanced Louvain algorithm...
+Detected 191 communities with modularity 0.9557
+Community sizes: min=1, max=12810, avg=1351.9
+Building inter-community network...
+Community network: 191 communities, 733 inter-community connections
+Creating network overview visualization...
+Sampling 5000 nodes for visualization...
+Computing layout...
+Network overview saved to /scratch/oms7891/Social_Network_Clustering/community_analysis_results/network_overview.png
+Creating community network visualization...
+Community network visualization saved to /scratch/oms7891/Social_Network_Clustering/community_analysis_results/community_network.png
+Analyzing community properties...
+Creating community analysis plots...
+Community analysis plots saved to /scratch/oms7891/Social_Network_Clustering/community_analysis_results
+Creating summary report...
+Summary report saved to /scratch/oms7891/Social_Network_Clustering/community_analysis_results/analysis_report.md
+
+Analysis completed! Results saved to /scratch/oms7891/Social_Network_Clustering/community_analysis_results
+Key files generated:
+  - network_overview.png: Overview of the original network
+  - community_network.png: Inter-community network visualization
+  - community_analysis_dashboard.png: Comprehensive analysis plots
+  - analysis_report.md: Detailed summary report
+  - community_assignments.csv: MOF to community mapping
+  - detailed_community_analysis.csv: Detailed community metrics
+
+Analysis completed successfully!
+Results saved to: /scratch/oms7891/Social_Network_Clustering/community_analysis_results
+
+============================================================
+COMMUNITY NETWORK ANALYSIS COMPLETED
+============================================================
+Generated files:
+  network_overview.png - Overview of the MOF network
+  community_network.png - Inter-community connections
+  community_analysis_dashboard.png - Detailed analysis plots
+  analysis_report.md - Comprehensive summary report
+  community_assignments.csv - MOF-to-community mapping
+  detailed_community_analysis.csv - Community metrics
+  community_network.gexf - Network file for Gephi/Cytoscape
+=============================================================
+JOB COMPLETED SUCCESSFULLY: Fri Jun 13 09:01:52 +04 2025
+Results located in: /scratch/oms7891/Social_Network_Clustering/community_analysis_results
+=============================================================
