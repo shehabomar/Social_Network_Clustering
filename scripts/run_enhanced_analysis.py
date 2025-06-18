@@ -120,20 +120,26 @@ def run_enhanced_analysis(args):
     completed_thresholds = set(checkpoint['completed_thresholds'])
     
     # Enhanced community analysis script
-    analysis_script = os.path.join(base_dir, "community_network_analysis.py")
+    # Look for the script in multiple possible locations
+    possible_paths = [
+        os.path.join(project_dir, "src", "community_network_analysis.py"),
+        os.path.join(project_dir, "Code", "community_network_analysis.py"),
+        os.path.join(base_dir, "community_network_analysis.py")
+    ]
+    
+    analysis_script = None
+    for path in possible_paths:
+        if os.path.exists(path):
+            analysis_script = path
+            break
+    
+    if not analysis_script:
+        print("Error: community_network_analysis.py not found in any expected location")
+        return False
     
     # Check if input files exist
-    missing_files = []
     if not os.path.exists(data_file):
-        missing_files.append(f"Data file: {data_file}")
-    
-    if not os.path.exists(analysis_script):
-        missing_files.append(f"Analysis script: {analysis_script}")
-    
-    if missing_files:
-        print("Error: Missing required files:")
-        for file in missing_files:
-            print(f"  - {file}")
+        print(f"Error: Missing data file: {data_file}")
         return False
     
     print("✓ All input files found")

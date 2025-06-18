@@ -1,0 +1,16 @@
+{
+  "project_name": "Social Network Clustering",
+  "data_path": "/scratch/oms7891/selected data/selected_data.csv",
+  "default_output_dir": "results",
+  "python_executable": "/share/apps/NYUAD5/miniconda/3-4.11.0/bin/python",
+  "resource_limits": {
+    "OMP_NUM_THREADS": 4,
+    "memory_gb": 64,
+    "time_hours": 48
+  },
+  "default_parameters": {
+    "thresholds": [0.7, 0.75],
+    "algorithms": ["louvain", "girvan_newman"],
+    "resolution": 1.0
+  }
+}
