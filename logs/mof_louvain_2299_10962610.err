@@ -1,0 +1,4 @@
+Similarity batches:   0%|          | 0/1 [00:00<?, ?it/s]Similarity batches: 100%|██████████| 1/1 [00:02<00:00,  2.63s/it]Similarity batches: 100%|██████████| 1/1 [00:02<00:00,  2.63s/it]
+  0%|          | 0/148447 [00:00<?, ?it/s] 35%|███▍      | 51813/148447 [00:00<00:00, 518108.26it/s] 70%|███████   | 104599/148447 [00:00<00:00, 523829.34it/s]100%|██████████| 148447/148447 [00:00<00:00, 524728.52it/s]
+/scratch/oms7891/Social_Network_Clustering/src/mof_social_network.py:468: MatplotlibDeprecationWarning: The get_cmap function was deprecated in Matplotlib 3.7 and will be removed in 3.11. Use ``matplotlib.colormaps[name]`` or ``matplotlib.colormaps.get_cmap()`` or ``pyplot.get_cmap()`` instead.
+  cmap = plt.cm.get_cmap('viridis', max(communities.values()) + 1)

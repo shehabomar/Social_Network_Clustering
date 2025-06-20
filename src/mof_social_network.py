@@ -104,10 +104,9 @@ def load_and_preprocess_data(file_path, sample_size=None):
     mof_ids = df[id_column].values
     
     # Extract features (all columns except the ID column)
-    feature_columns = [col for col in df.columns if col != id_column]
-    features_df = df[feature_columns]
-    
-    # Handle missing values
+    features_df = df.drop(columns=[id_column])
+    # Only keep numeric columns for features (fix for string-to-float error)
+    features_df = features_df.select_dtypes(include=[np.number])
     features_df = features_df.fillna(0)
     
     # Normalize the features using Min-Max scaling
@@ -116,7 +115,7 @@ def load_and_preprocess_data(file_path, sample_size=None):
     features_normalized = scaler.fit_transform(features_df).astype(np.float32)
     
     # Create a DataFrame with normalized features
-    normalized_df = pd.DataFrame(features_normalized, columns=feature_columns)
+    normalized_df = pd.DataFrame(features_normalized, columns=features_df.columns)
     normalized_df[id_column] = mof_ids
     
     print(f"Preprocessing complete. Data shape: {normalized_df.shape}")
@@ -460,13 +459,13 @@ def visualize_network(G, communities, output_file, title="MOF Social Network"):
     # Create a spring layout with better parameters
     pos = nx.spring_layout(G, k=1, iterations=50, seed=42)
     
-    plt.figure(figsize=(15, 15))
+    fig, ax = plt.subplots(figsize=(15, 15))
     
     # Draw edges with low alpha for better visibility
-    nx.draw_networkx_edges(G, pos, alpha=0.1, width=0.5)
+    nx.draw_networkx_edges(G, pos, alpha=0.1, width=0.5, ax=ax)
     
     # Draw nodes with community colors
-    cmap = plt.cm.get_cmap('viridis', max(communities.values()) + 1)
+    cmap = plt.colormaps.get_cmap('viridis', max(communities.values()) + 1)
     node_colors = [communities[node] for node in G.nodes()]
     
     # Draw nodes with size based on degree
@@ -478,15 +477,16 @@ def visualize_network(G, communities, output_file, title="MOF Social Network"):
         node_color=node_colors,
         node_size=node_sizes,
         cmap=cmap,
-        alpha=0.7
+        alpha=0.7,
+        ax=ax
     )
     
     # Add a colorbar
     sm = plt.cm.ScalarMappable(cmap=cmap, norm=plt.Normalize(vmin=0, vmax=max(communities.values())))
-    plt.colorbar(sm, label='Community ID')
+    fig.colorbar(sm, ax=ax, label='Community ID')
     
-    plt.title(title, fontsize=16)
-    plt.axis('off')
+    ax.set_title(title, fontsize=16)
+    ax.axis('off')
     
     # Save the figure with high DPI
     plt.savefig(output_file, dpi=300, bbox_inches='tight')
