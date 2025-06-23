@@ -1,0 +1,10 @@
+2025-06-23 12:40:18 - mof_pipeline.adjacency_matrix_generation - INFO - Logging initialized - log file: /scratch/oms7891/Social_Network_Clustering/logs/adjacency_matrix_generation_20250623_124018.log
+2025-06-23 12:40:18 - mof_pipeline.adjacency_matrix_generation - INFO - ============================================================
+2025-06-23 12:40:18 - mof_pipeline.adjacency_matrix_generation - INFO - Starting: Adjacency Matrix Generation
+2025-06-23 12:40:18 - mof_pipeline.adjacency_matrix_generation - INFO - Command: python /scratch/oms7891/Social_Network_Clustering/src/mof_social_network.py --input main dataset/selected_data.csv --output_dir Social_Network_Clustering/results/3k/louvain_0.9t/adj_matrix --threshold 0.9 --resolution 1.0 --algorithm louvain --save_adjacency
+2025-06-23 12:40:18 - mof_pipeline.adjacency_matrix_generation - INFO - Timeout: 48 hours
+2025-06-23 12:40:18 - mof_pipeline.adjacency_matrix_generation - INFO - ============================================================
+2025-06-23 12:40:18 - mof_pipeline.adjacency_matrix_generation - INFO - Subprocess output will be saved to: /scratch/oms7891/Social_Network_Clustering/logs/adjacency_matrix_generation_output_20250623_124018.log
+2025-06-23 12:44:56 - mof_pipeline.adjacency_matrix_generation - ERROR - Adjacency Matrix Generation failed after 0.08 hours
+2025-06-23 12:44:56 - mof_pipeline.adjacency_matrix_generation - ERROR - Error code: -9
+2025-06-23 12:44:56 - mof_pipeline.adjacency_matrix_generation - ERROR - Check the subprocess log for detailed error information: /scratch/oms7891/Social_Network_Clustering/logs/adjacency_matrix_generation_output_20250623_124018.log

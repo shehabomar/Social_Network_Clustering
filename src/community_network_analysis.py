@@ -232,6 +232,7 @@ def build_community_network(G, communities):
     
     # Add edges between communities
     inter_community_edges = defaultdict(lambda: defaultdict(float))
+    edge_counts = defaultdict(lambda: defaultdict(int))
     
     for edge in tqdm(G.edges(data=True), desc="Processing inter-community edges"):
         node1, node2, data = edge
@@ -241,6 +242,8 @@ def build_community_network(G, communities):
             weight = data.get('weight', 1.0)
             inter_community_edges[comm1][comm2] += weight
             inter_community_edges[comm2][comm1] += weight
+            edge_counts[comm1][comm2] += 1
+            edge_counts[comm2][comm1] += 1
     
     # Add weighted edges between communities
     for comm1, connections in inter_community_edges.items():
@@ -254,7 +257,7 @@ def build_community_network(G, communities):
                 comm_graph.add_edge(comm1, comm2, 
                                    weight=total_weight,
                                    normalized_weight=normalized_weight,
-                                   edge_count=1)
+                                   edge_count=edge_counts[comm1][comm2])
     
     print(f"Community network: {comm_graph.number_of_nodes()} communities, {comm_graph.number_of_edges()} inter-community connections")
     return comm_graph, community_nodes
@@ -583,245 +586,16 @@ def create_summary_report(G, communities, comm_graph, analysis_results, algorith
     print(f"Summary report saved to {output_file}")
     return outlier_analysis
 
-def run_single_threshold_analysis(threshold, data_file, output_base_dir, algorithms=['louvain', 'girvan_newman']):
-    """
-    Run complete analysis for a single threshold
-    """
-    print(f"\n{'='*60}")
-    print(f"ANALYZING THRESHOLD {threshold}")
-    print(f"{'='*60}")
-    
-    # Import from the main MOF social network script
-    import sys
-    code_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'Code')
-    sys.path.append(code_dir)
-    from mof_social_network import load_and_preprocess_data, calculate_similarity_matrix, save_adjacency_matrix
-    
-    # Create threshold-specific output directory
-    threshold_dir = os.path.join(output_base_dir, 'threshold_analysis')
-    os.makedirs(threshold_dir, exist_ok=True)
-    
-    # Load and preprocess data
-    df, id_column = load_and_preprocess_data(data_file)
-    
-    # Calculate adjacency matrix for this threshold
-    print(f"Calculating similarity matrix for threshold {threshold}...")
-    adjacency_dict = calculate_similarity_matrix(
-        df, id_column, 
-        threshold=threshold, 
-        batch_size=10000,
-        top_k=100,
-        n_jobs=4  # Use parallel processing
-    )
-    
-    # Save adjacency matrix
-    adj_file = os.path.join(threshold_dir, f'adjacency_matrix_t{threshold}.pkl')
-    save_adjacency_matrix(adjacency_dict, adj_file)
-    
-    # Save metadata
-    metadata = {
-        'num_nodes': len(df),
-        'num_edges': len(adjacency_dict),
-        'threshold': threshold,
-        'id_column': id_column,
-        'processing_time': time.time()
-    }
-    metadata_file = os.path.join(threshold_dir, f'adjacency_metadata_t{threshold}.pkl')
-    with open(metadata_file, 'wb') as f:
-        pickle.dump(metadata, f)
-    
-    # Build network
-    G = build_network_from_adjacency(adjacency_dict)
-    
-    results = {}
-    
-    # Run algorithms
-    for algorithm in algorithms:
-        print(f"\nRunning {algorithm} algorithm...")
-        
-        # Create algorithm-specific output directory
-        alg_dir = os.path.join(threshold_dir, f'{algorithm}_t{threshold}')
-        os.makedirs(alg_dir, exist_ok=True)
-        
-        # Detect communities
-        if algorithm == 'louvain':
-            communities, modularity = detect_communities_enhanced(G, resolution=1.0)
-        elif algorithm == 'girvan_newman':
-            communities, modularity = detect_communities_girvan_newman_enhanced(G, max_communities=50)
-        else:
-            continue
-        
-        # Build community network
-        comm_graph, community_nodes = build_community_network(G, communities)
-        
-        # Analyze communities
-        analysis_results = analyze_community_properties(G, communities, comm_graph, community_nodes)
-        
-        # Create visualizations
-        create_network_overview(G, communities, 
-                              os.path.join(alg_dir, 'network_overview.png'))
-        
-        create_community_network_visualization(comm_graph, community_nodes,
-                                             os.path.join(alg_dir, 'community_network.png'))
-        
-        create_community_analysis_plots(analysis_results, alg_dir)
-        
-        # Create summary report
-        outlier_analysis = create_summary_report(G, communities, comm_graph, analysis_results, 
-                                                algorithm, threshold,
-                                                os.path.join(alg_dir, 'analysis_report.md'))
-        
-        # Save community assignments
-        community_df = pd.DataFrame(list(communities.items()), columns=['MOF_ID', 'Community_ID'])
-        community_df.to_csv(os.path.join(alg_dir, 'community_assignments.csv'), index=False)
-        
-        # Save results for comparison
-        results[algorithm] = {
-            'num_communities': len(set(communities.values())),
-            'modularity': modularity,
-            'avg_conductance': np.mean([r['conductance'] for r in analysis_results.values()]),
-            'avg_degree': np.mean([G.degree(node) for node in G.nodes()]),
-            'largest_community': max(Counter(communities.values()).values()),
-            'outlier_analysis': outlier_analysis,
-            'analysis_results': analysis_results
-        }
-        
-        print(f"{algorithm} analysis completed for threshold {threshold}")
-    
-    print(f"Threshold {threshold} analysis completed!")
-    return results
-
-def create_threshold_comparison_analysis(all_results, output_dir):
-    """
-    Create comprehensive comparison analysis across thresholds and algorithms
-    """
-    print("Creating threshold comparison analysis...")
-    
-    comparison_dir = os.path.join(output_dir, 'comparison_analysis')
-    os.makedirs(comparison_dir, exist_ok=True)
-    
-    # Prepare comparison data
-    comparison_data = []
-    
-    for threshold, threshold_results in all_results.items():
-        for algorithm, results in threshold_results.items():
-            comparison_data.append({
-                'threshold': threshold,
-                'algorithm': algorithm,
-                'num_communities': results['num_communities'],
-                'modularity': results['modularity'],
-                'avg_conductance': results['avg_conductance'],
-                'avg_degree': results['avg_degree'],
-                'largest_community': results['largest_community'],
-                'outliers_count': results['outlier_analysis']['outliers_count'],
-                'total_communities': results['outlier_analysis']['total_communities']
-            })
-    
-    df_comparison = pd.DataFrame(comparison_data)
-    
-    # Save comparison table
-    df_comparison.to_csv(os.path.join(comparison_dir, 'threshold_algorithm_comparison.csv'), index=False)
-    
-    # Create comparison plots
-    fig, axes = plt.subplots(2, 3, figsize=(18, 12))
-    fig.suptitle('Threshold and Algorithm Comparison', fontsize=16, fontweight='bold')
-    
-    # Plot 1: Number of communities vs threshold
-    ax = axes[0, 0]
-    for algorithm in df_comparison['algorithm'].unique():
-        alg_data = df_comparison[df_comparison['algorithm'] == algorithm]
-        ax.plot(alg_data['threshold'], alg_data['num_communities'], 
-                marker='o', label=algorithm, linewidth=2)
-    ax.set_xlabel('Similarity Threshold')
-    ax.set_ylabel('Number of Communities')
-    ax.set_title('Communities vs Threshold')
-    ax.legend()
-    ax.grid(True, alpha=0.3)
-    
-    # Plot 2: Modularity vs threshold
-    ax = axes[0, 1]
-    for algorithm in df_comparison['algorithm'].unique():
-        alg_data = df_comparison[df_comparison['algorithm'] == algorithm]
-        ax.plot(alg_data['threshold'], alg_data['modularity'], 
-                marker='s', label=algorithm, linewidth=2)
-    ax.set_xlabel('Similarity Threshold')
-    ax.set_ylabel('Modularity')
-    ax.set_title('Modularity vs Threshold')
-    ax.legend()
-    ax.grid(True, alpha=0.3)
-    
-    # Plot 3: Average conductance vs threshold
-    ax = axes[0, 2]
-    for algorithm in df_comparison['algorithm'].unique():
-        alg_data = df_comparison[df_comparison['algorithm'] == algorithm]
-        ax.plot(alg_data['threshold'], alg_data['avg_conductance'], 
-                marker='^', label=algorithm, linewidth=2)
-    ax.set_xlabel('Similarity Threshold')
-    ax.set_ylabel('Average Conductance')
-    ax.set_title('Conductance vs Threshold')
-    ax.legend()
-    ax.grid(True, alpha=0.3)
-    
-    # Plot 4: Average degree vs threshold
-    ax = axes[1, 0]
-    for algorithm in df_comparison['algorithm'].unique():
-        alg_data = df_comparison[df_comparison['algorithm'] == algorithm]
-        ax.plot(alg_data['threshold'], alg_data['avg_degree'], 
-                marker='d', label=algorithm, linewidth=2)
-    ax.set_xlabel('Similarity Threshold')
-    ax.set_ylabel('Average Degree')
-    ax.set_title('Average Degree vs Threshold')
-    ax.legend()
-    ax.grid(True, alpha=0.3)
-    
-    # Plot 5: Largest community size vs threshold
-    ax = axes[1, 1]
-    for algorithm in df_comparison['algorithm'].unique():
-        alg_data = df_comparison[df_comparison['algorithm'] == algorithm]
-        ax.plot(alg_data['threshold'], alg_data['largest_community'], 
-                marker='v', label=algorithm, linewidth=2)
-    ax.set_xlabel('Similarity Threshold')
-    ax.set_ylabel('Largest Community Size')
-    ax.set_title('Largest Community vs Threshold')
-    ax.legend()
-    ax.grid(True, alpha=0.3)
-    
-    # Plot 6: Performance comparison heatmap
-    ax = axes[1, 2]
-    pivot_data = df_comparison.pivot(index='algorithm', columns='threshold', values='modularity')
-    sns.heatmap(pivot_data, annot=True, fmt='.3f', cmap='viridis', ax=ax)
-    ax.set_title('Modularity Heatmap')
-    
-    plt.tight_layout()
-    plt.savefig(os.path.join(comparison_dir, 'threshold_comparison_plots.png'), 
-                dpi=300, bbox_inches='tight', facecolor='white')
-    plt.close()
-    
-    # Create performance ranking
-    df_comparison['performance_score'] = (
-        df_comparison['modularity'] * 0.4 +  # Modularity weight
-        (1 - df_comparison['avg_conductance']) * 0.3 +  # Conductance weight (inverted)
-        (df_comparison['num_communities'] / df_comparison['num_communities'].max()) * 0.3  # Community count weight
-    )
-    
-    performance_ranking = df_comparison.sort_values('performance_score', ascending=False)
-    performance_ranking.to_csv(os.path.join(comparison_dir, 'performance_ranking.csv'), index=False)
-    
-    print(f"Comparison analysis saved to {comparison_dir}")
-    return df_comparison
-
 def main():
-    parser = argparse.ArgumentParser(description='Enhanced Community Network Analysis with Multi-Threshold Support')
+    parser = argparse.ArgumentParser(description='Community Network Analysis for MOF Pipeline')
+    parser.add_argument('--adjacency_matrix', required=True,
+                       help='Path to adjacency matrix pickle file')
+    parser.add_argument('--metadata', required=True,
+                       help='Path to metadata pickle file')
     parser.add_argument('--data_file', required=True,
                        help='Path to the original MOF data CSV file')
-    parser.add_argument('--output_dir', default='enhanced_community_results', 
+    parser.add_argument('--output_dir', required=True,
                        help='Output directory for results')
-    parser.add_argument('--thresholds', nargs='+', type=float, 
-                       default=[0.7, 0.75, 0.8, 0.85, 0.9, 0.95],
-                       help='Similarity thresholds to test')
-    parser.add_argument('--algorithms', nargs='+', choices=['louvain', 'girvan_newman'], 
-                       default=['louvain', 'girvan_newman'],
-                       help='Algorithms to run')
     parser.add_argument('--resolution', type=float, default=1.0,
                        help='Resolution parameter for community detection (default: 1.0)')
     
@@ -830,49 +604,57 @@ def main():
     # Create output directory
     os.makedirs(args.output_dir, exist_ok=True)
     
-    print(f"Enhanced MOF Social Network Analysis")
-    print(f"Testing thresholds: {args.thresholds}")
-    print(f"Using algorithms: {args.algorithms}")
+    print(f"Community Network Analysis for MOF Pipeline")
+    print(f"Adjacency matrix: {args.adjacency_matrix}")
+    print(f"Data file: {args.data_file}")
+    print(f"Output directory: {args.output_dir}")
+    print(f"Resolution: {args.resolution}")
     
-    # Run analysis for each threshold
-    all_results = {}
+    # Load adjacency matrix and metadata
+    adjacency_dict = load_adjacency_matrix(args.adjacency_matrix)
+    metadata = load_metadata(args.metadata)
     
-    for threshold in args.thresholds:
-        try:
-            results = run_single_threshold_analysis(
-                threshold, 
-                args.data_file, 
-                args.output_dir, 
-                args.algorithms
-            )
-            all_results[threshold] = results
-        except Exception as e:
-            print(f"Error analyzing threshold {threshold}: {e}")
-            continue
+    # Build network from adjacency matrix
+    G = build_network_from_adjacency(adjacency_dict)
     
-    # Create comprehensive comparison
-    if len(all_results) > 1:
-        df_comparison = create_threshold_comparison_analysis(all_results, args.output_dir)
-        
-        # Save all results summary
-        with open(os.path.join(args.output_dir, 'all_results_summary.json'), 'w') as f:
-            # Convert numpy types to Python types for JSON serialization
-            json_results = {}
-            for threshold, threshold_results in all_results.items():
-                json_results[str(threshold)] = {}
-                for algorithm, results in threshold_results.items():
-                    json_results[str(threshold)][algorithm] = {
-                        k: float(v) if isinstance(v, (np.integer, np.floating)) else v
-                        for k, v in results.items() 
-                        if k not in ['analysis_results', 'outlier_analysis']  # Skip complex nested objects
-                    }
-            json.dump(json_results, f, indent=2)
+    # Detect communities using Louvain algorithm
+    communities, modularity = detect_communities_enhanced(G, resolution=args.resolution)
     
-    print(f"\nEnhanced analysis completed! Results saved to {args.output_dir}")
+    # Build community network
+    comm_graph, community_nodes = build_community_network(G, communities)
+    
+    # Analyze community properties
+    analysis_results = analyze_community_properties(G, communities, comm_graph, community_nodes)
+    
+    # Create network overview visualization
+    network_overview_file = os.path.join(args.output_dir, 'network_overview.png')
+    create_network_overview(G, communities, network_overview_file)
+    
+    # Create community network visualization
+    community_network_file = os.path.join(args.output_dir, 'community_network.png')
+    create_community_network_visualization(comm_graph, community_nodes, community_network_file)
+    
+    # Create analysis plots
+    create_community_analysis_plots(analysis_results, args.output_dir)
+    
+    # Create summary report
+    summary_file = os.path.join(args.output_dir, 'summary_report.txt')
+    create_summary_report(G, communities, comm_graph, analysis_results, 'louvain', metadata['threshold'], summary_file)
+    
+    # Save community assignments
+    community_assignments_file = os.path.join(args.output_dir, 'community_assignments.csv')
+    with open(community_assignments_file, 'w') as f:
+        f.write('MOF_ID,Community_ID\n')
+        for mof_id, community_id in communities.items():
+            f.write(f'{mof_id},{community_id}\n')
+    
+    print(f"\nCommunity analysis completed successfully!")
+    print(f"Results saved to: {args.output_dir}")
     print(f"Key outputs:")
-    print(f"  - threshold_analysis/: Individual threshold results")
-    print(f"  - comparison_analysis/: Cross-threshold comparisons")
-    print(f"  - all_results_summary.json: Summary of all results")
+    print(f"  - network_overview.png: Network visualization")
+    print(f"  - community_network.png: Community network visualization")
+    print(f"  - community_assignments.csv: Community assignments")
+    print(f"  - summary_report.txt: Analysis summary")
 
 if __name__ == "__main__":
     main() 

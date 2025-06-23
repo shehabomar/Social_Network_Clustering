@@ -1,0 +1,9 @@
+2025-06-23 14:31:00 - mof_pipeline.community_analysis - INFO - Logging initialized - log file: /scratch/oms7891/Social_Network_Clustering/logs/community_analysis_20250623_143100.log
+2025-06-23 14:31:00 - mof_pipeline.community_analysis - INFO - ============================================================
+2025-06-23 14:31:00 - mof_pipeline.community_analysis - INFO - Starting: Community Analysis
+2025-06-23 14:31:00 - mof_pipeline.community_analysis - INFO - Command: python /scratch/oms7891/Social_Network_Clustering/src/community_network_analysis.py --adjacency_matrix Social_Network_Clustering/results/3k/louvain_0.9t/adj_matrix/adjacency_matrix_t0.999.pkl --metadata Social_Network_Clustering/results/3k/louvain_0.9t/adj_matrix/adjacency_matrix_metadata_t0.999.pkl --data_file Social_Network_Clustering/data/mof_structures_2299.csv --output_dir /scratch/oms7891/Social_Network_Clustering/results/3k/louvain_0.9t/comm_analysis --resolution 1.0
+2025-06-23 14:31:00 - mof_pipeline.community_analysis - INFO - Timeout: 12 hours
+2025-06-23 14:31:00 - mof_pipeline.community_analysis - INFO - ============================================================
+2025-06-23 14:31:00 - mof_pipeline.community_analysis - INFO - Subprocess output will be saved to: /scratch/oms7891/Social_Network_Clustering/logs/community_analysis_output_20250623_143100.log
+2025-06-23 14:33:12 - mof_pipeline.community_analysis - INFO - Community Analysis completed successfully in 0.04 hours
+2025-06-23 14:33:12 - mof_pipeline.community_analysis - INFO - Full output logged to: /scratch/oms7891/Social_Network_Clustering/logs/community_analysis_output_20250623_143100.log

@@ -1,4 +1,12 @@
+# Set environment variables to limit threads and avoid NumPy issues
 import os
+os.environ['OMP_NUM_THREADS'] = '1'
+os.environ['OPENBLAS_NUM_THREADS'] = '1'
+os.environ['MKL_NUM_THREADS'] = '1'
+os.environ['NUMEXPR_NUM_THREADS'] = '1'
+os.environ['BLAS_NUM_THREADS'] = '1'
+os.environ['LAPACK_NUM_THREADS'] = '1'
+
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
@@ -465,7 +473,8 @@ def visualize_network(G, communities, output_file, title="MOF Social Network"):
     nx.draw_networkx_edges(G, pos, alpha=0.1, width=0.5, ax=ax)
     
     # Draw nodes with community colors
-    cmap = plt.colormaps.get_cmap('viridis', max(communities.values()) + 1)
+    max_communities = max(communities.values()) + 1
+    cmap = plt.cm.get_cmap('viridis', max_communities)
     node_colors = [communities[node] for node in G.nodes()]
     
     # Draw nodes with size based on degree
@@ -505,12 +514,14 @@ def save_community_analysis(community_stats, output_file):
     # Convert to DataFrame
     rows = []
     for community_id, stats in community_stats.items():
+        central_mofs_str = ', '.join([str(mof) for mof in stats['central_mofs']])
+        
         row = {
             'Community_ID': community_id,
             'Size': stats['size'],
             'Average_Degree': stats['avg_degree'],
             'Density': stats['density'],
-            'Central_MOFs': ', '.join(stats['central_mofs'])
+            'Central_MOFs': central_mofs_str
         }
         
         # Add feature means if available
@@ -567,7 +578,7 @@ def main():
         
         # Save adjacency matrix if requested
         if args.save_adjacency:
-            adjacency_file = os.path.join(args.output_dir, f'adjacency_matrix_threshold_{args.threshold}.pkl')
+            adjacency_file = os.path.join(args.output_dir, f'adjacency_matrix_t{args.threshold}.pkl')
             save_adjacency_matrix(adjacency_dict, adjacency_file)
             
             # Save metadata
@@ -578,7 +589,7 @@ def main():
                 'id_column': id_column,
                 'processing_time': time.time() - start_time
             }
-            metadata_file = os.path.join(args.output_dir, f'adjacency_matrix_metadata_{args.threshold}.pkl')
+            metadata_file = os.path.join(args.output_dir, f'adjacency_matrix_metadata_t{args.threshold}.pkl')
             with open(metadata_file, 'wb') as f:
                 pickle.dump(metadata, f)
     

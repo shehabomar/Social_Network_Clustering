@@ -1,10 +1,0 @@
-Similarity batches:   0%|          | 0/1 [00:00<?, ?it/s]Similarity batches: 100%|██████████| 1/1 [00:02<00:00,  2.60s/it]Similarity batches: 100%|██████████| 1/1 [00:02<00:00,  2.60s/it]
-  0%|          | 0/148447 [00:00<?, ?it/s] 34%|███▍      | 50226/148447 [00:00<00:00, 502236.53it/s] 69%|██████▉   | 102753/148447 [00:00<00:00, 515772.64it/s]100%|██████████| 148447/148447 [00:00<00:00, 515713.16it/s]
-Traceback (most recent call last):
-  File "/scratch/oms7891/Social_Network_Clustering/src/mof_social_network.py", line 621, in <module>
-    main() 
-  File "/scratch/oms7891/Social_Network_Clustering/src/mof_social_network.py", line 600, in main
-    visualize_network(G, louvain_communities, 
-  File "/scratch/oms7891/Social_Network_Clustering/src/mof_social_network.py", line 468, in visualize_network
-    cmap = plt.colormaps.get_cmap('viridis', max(communities.values()) + 1)
-TypeError: get_cmap() takes 2 positional arguments but 3 were given

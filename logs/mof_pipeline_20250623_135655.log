@@ -1,0 +1,61 @@
+2025-06-23 13:56:55 - mof_pipeline - INFO - Logging initialized - log file: /scratch/oms7891/Social_Network_Clustering/logs/mof_pipeline_20250623_135655.log
+2025-06-23 13:56:55 - mof_pipeline - INFO - starting MOF Analysis Pipeline
+2025-06-23 13:56:55 - mof_pipeline - INFO - input data: Social_Network_Clustering/data/mof_structures_2299.csv
+2025-06-23 13:56:55 - mof_pipeline - INFO - output directory: Social_Network_Clustering/results/3k/louvain_0.9t/adj_matrix
+2025-06-23 13:56:55 - mof_pipeline - INFO - parameters: threshold=0.9, resolution=1.0
+2025-06-23 13:56:55 - mof_pipeline - INFO - algorithm: louvain
+2025-06-23 13:56:55 - mof_pipeline - INFO - ============================================================
+2025-06-23 13:56:55 - mof_pipeline - INFO - SYSTEM INFORMATION
+2025-06-23 13:56:55 - mof_pipeline - INFO - ============================================================
+2025-06-23 13:56:55 - mof_pipeline - INFO - python version: 3.9.16 | packaged by conda-forge | (main, Feb  1 2023, 21:39:03) 
+[GCC 11.3.0]
+2025-06-23 13:56:55 - mof_pipeline - INFO - working directory: /scratch/oms7891
+2025-06-23 13:56:55 - mof_pipeline - INFO - script directory: /scratch/oms7891/Social_Network_Clustering/src
+2025-06-23 13:56:55 - mof_pipeline - INFO - found required file: Social_Network_Clustering/data/mof_structures_2299.csv
+2025-06-23 13:56:55 - mof_pipeline - INFO - 
+STEP 1: Generating adjacency matrix...
+2025-06-23 13:56:55 - mof_pipeline - INFO - Step 1 command: python /scratch/oms7891/Social_Network_Clustering/src/mof_social_network.py --input Social_Network_Clustering/data/mof_structures_2299.csv --output_dir Social_Network_Clustering/results/3k/louvain_0.9t/adj_matrix --threshold 0.9 --resolution 1.0 --algorithm louvain --save_adjacency
+2025-06-23 13:56:55 - mof_pipeline.adjacency_matrix_generation - INFO - Logging initialized - log file: /scratch/oms7891/Social_Network_Clustering/logs/adjacency_matrix_generation_20250623_135655.log
+2025-06-23 13:56:55 - mof_pipeline.adjacency_matrix_generation - INFO - ============================================================
+2025-06-23 13:56:55 - mof_pipeline.adjacency_matrix_generation - INFO - Starting: Adjacency Matrix Generation
+2025-06-23 13:56:55 - mof_pipeline.adjacency_matrix_generation - INFO - Command: python /scratch/oms7891/Social_Network_Clustering/src/mof_social_network.py --input Social_Network_Clustering/data/mof_structures_2299.csv --output_dir Social_Network_Clustering/results/3k/louvain_0.9t/adj_matrix --threshold 0.9 --resolution 1.0 --algorithm louvain --save_adjacency
+2025-06-23 13:56:55 - mof_pipeline.adjacency_matrix_generation - INFO - Timeout: 48 hours
+2025-06-23 13:56:55 - mof_pipeline.adjacency_matrix_generation - INFO - ============================================================
+2025-06-23 13:56:55 - mof_pipeline.adjacency_matrix_generation - INFO - Subprocess output will be saved to: /scratch/oms7891/Social_Network_Clustering/logs/adjacency_matrix_generation_output_20250623_135655.log
+2025-06-23 13:58:35 - mof_pipeline.adjacency_matrix_generation - INFO - Adjacency Matrix Generation completed successfully in 0.03 hours
+2025-06-23 13:58:35 - mof_pipeline.adjacency_matrix_generation - INFO - Full output logged to: /scratch/oms7891/Social_Network_Clustering/logs/adjacency_matrix_generation_output_20250623_135655.log
+2025-06-23 13:58:35 - mof_pipeline - INFO - found required file: Social_Network_Clustering/results/3k/louvain_0.9t/adj_matrix/adjacency_matrix_t0.9.pkl
+2025-06-23 13:58:35 - mof_pipeline - INFO - 
+STEP 2: Running community analysis...
+2025-06-23 13:58:35 - mof_pipeline - INFO - Step 2 command: python /scratch/oms7891/Social_Network_Clustering/src/community_network_analysis.py --adjacency_matrix Social_Network_Clustering/results/3k/louvain_0.9t/adj_matrix/adjacency_matrix_t0.9.pkl --metadata Social_Network_Clustering/results/3k/louvain_0.9t/adj_matrix/adjacency_matrix_metadata_t0.9.pkl --data_file Social_Network_Clustering/data/mof_structures_2299.csv --output_dir /scratch/oms7891/Social_Network_Clustering/results/3k/louvain_0.9t/comm_analysis --resolution 1.0
+2025-06-23 13:58:35 - mof_pipeline.community_analysis - INFO - Logging initialized - log file: /scratch/oms7891/Social_Network_Clustering/logs/community_analysis_20250623_135835.log
+2025-06-23 13:58:35 - mof_pipeline.community_analysis - INFO - ============================================================
+2025-06-23 13:58:35 - mof_pipeline.community_analysis - INFO - Starting: Community Analysis
+2025-06-23 13:58:35 - mof_pipeline.community_analysis - INFO - Command: python /scratch/oms7891/Social_Network_Clustering/src/community_network_analysis.py --adjacency_matrix Social_Network_Clustering/results/3k/louvain_0.9t/adj_matrix/adjacency_matrix_t0.9.pkl --metadata Social_Network_Clustering/results/3k/louvain_0.9t/adj_matrix/adjacency_matrix_metadata_t0.9.pkl --data_file Social_Network_Clustering/data/mof_structures_2299.csv --output_dir /scratch/oms7891/Social_Network_Clustering/results/3k/louvain_0.9t/comm_analysis --resolution 1.0
+2025-06-23 13:58:35 - mof_pipeline.community_analysis - INFO - Timeout: 12 hours
+2025-06-23 13:58:35 - mof_pipeline.community_analysis - INFO - ============================================================
+2025-06-23 13:58:35 - mof_pipeline.community_analysis - INFO - Subprocess output will be saved to: /scratch/oms7891/Social_Network_Clustering/logs/community_analysis_output_20250623_135835.log
+2025-06-23 14:02:43 - mof_pipeline.community_analysis - INFO - Community Analysis completed successfully in 0.07 hours
+2025-06-23 14:02:43 - mof_pipeline.community_analysis - INFO - Full output logged to: /scratch/oms7891/Social_Network_Clustering/logs/community_analysis_output_20250623_135835.log
+2025-06-23 14:02:43 - mof_pipeline - INFO - 
+STEP 3: Running centrality analysis...
+2025-06-23 14:02:43 - mof_pipeline - INFO - Step 3 command: python /scratch/oms7891/Social_Network_Clustering/src/../scripts/analysis_centrality.py --adjacency_matrix Social_Network_Clustering/results/3k/louvain_0.9t/adj_matrix/adjacency_matrix_t0.9.pkl --communities_file /scratch/oms7891/Social_Network_Clustering/results/3k/louvain_0.9t/comm_analysis/community_assignments.csv --output_dir /scratch/oms7891/Social_Network_Clustering/results/3k/integrated_analysis_louvain_t0.9
+2025-06-23 14:02:43 - mof_pipeline.centrality_analysis - INFO - Logging initialized - log file: /scratch/oms7891/Social_Network_Clustering/logs/centrality_analysis_20250623_140243.log
+2025-06-23 14:02:43 - mof_pipeline.centrality_analysis - INFO - ============================================================
+2025-06-23 14:02:43 - mof_pipeline.centrality_analysis - INFO - Starting: Centrality Analysis
+2025-06-23 14:02:43 - mof_pipeline.centrality_analysis - INFO - Command: python /scratch/oms7891/Social_Network_Clustering/src/../scripts/analysis_centrality.py --adjacency_matrix Social_Network_Clustering/results/3k/louvain_0.9t/adj_matrix/adjacency_matrix_t0.9.pkl --communities_file /scratch/oms7891/Social_Network_Clustering/results/3k/louvain_0.9t/comm_analysis/community_assignments.csv --output_dir /scratch/oms7891/Social_Network_Clustering/results/3k/integrated_analysis_louvain_t0.9
+2025-06-23 14:02:43 - mof_pipeline.centrality_analysis - INFO - Timeout: 6 hours
+2025-06-23 14:02:43 - mof_pipeline.centrality_analysis - INFO - ============================================================
+2025-06-23 14:02:43 - mof_pipeline.centrality_analysis - INFO - Subprocess output will be saved to: /scratch/oms7891/Social_Network_Clustering/logs/centrality_analysis_output_20250623_140243.log
+2025-06-23 14:11:47 - mof_pipeline.centrality_analysis - INFO - Centrality Analysis completed successfully in 0.15 hours
+2025-06-23 14:11:47 - mof_pipeline.centrality_analysis - INFO - Full output logged to: /scratch/oms7891/Social_Network_Clustering/logs/centrality_analysis_output_20250623_140243.log
+2025-06-23 14:11:47 - mof_pipeline - INFO - 
+PIPELINE COMPLETED SUCCESSFULLY!
+2025-06-23 14:11:47 - mof_pipeline - INFO - ============================================================
+2025-06-23 14:11:47 - mof_pipeline - INFO - RESULTS SUMMARY
+2025-06-23 14:11:47 - mof_pipeline - INFO - ============================================================
+2025-06-23 14:11:47 - mof_pipeline - INFO - Key outputs:
+2025-06-23 14:11:47 - mof_pipeline - INFO -    - Adjacency matrix: Social_Network_Clustering/results/3k/louvain_0.9t/adj_matrix/adjacency_matrix_t0.9.pkl
+2025-06-23 14:11:47 - mof_pipeline - INFO -    - Community analysis: /scratch/oms7891/Social_Network_Clustering/results/3k/louvain_0.9t/comm_analysis
+2025-06-23 14:11:47 - mof_pipeline - INFO -    - Centrality analysis: /scratch/oms7891/Social_Network_Clustering/results/3k/integrated_analysis_louvain_t0.9
+2025-06-23 14:11:47 - mof_pipeline - INFO - Log files saved in: /scratch/oms7891/Social_Network_Clustering/logs

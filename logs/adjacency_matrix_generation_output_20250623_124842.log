@@ -1,0 +1,22 @@
+Loading data from Social_Network_Clustering/data/mof_structures_2299.csv...
+Processing all 2299 MOFs
+Normalizing features...
+Preprocessing complete. Data shape: (2299, 50)
+Similarity batches:   0%|          | 0/1 [00:00<?, ?it/s]Similarity batches: 100%|██████████| 1/1 [00:16<00:00, 16.29s/it]Similarity batches: 100%|██████████| 1/1 [00:16<00:00, 16.29s/it]
+Created adjacency matrix with 148447 edges above threshold 0.9
+Saving adjacency matrix to Social_Network_Clustering/results/3k/louvain_0.9t/adj_matrix/adjacency_matrix_t0.9.pkl...
+Adjacency matrix saved successfully (0.00 GB)
+Building network graph...
+  0%|          | 0/148447 [00:00<?, ?it/s] 39%|███▉      | 58329/148447 [00:00<00:00, 583251.62it/s] 82%|████████▏ | 121613/148447 [00:00<00:00, 612397.62it/s]100%|██████████| 148447/148447 [00:00<00:00, 611050.00it/s]
+/scratch/oms7891/Social_Network_Clustering/src/mof_social_network.py:477: MatplotlibDeprecationWarning: The get_cmap function was deprecated in Matplotlib 3.7 and will be removed in 3.11. Use ``matplotlib.colormaps[name]`` or ``matplotlib.colormaps.get_cmap()`` or ``pyplot.get_cmap()`` instead.
+  cmap = plt.cm.get_cmap('viridis', max_communities)
+Network built with 2299 nodes and 148447 edges
+Detecting communities using Louvain algorithm...
+Detected 39 communities using Louvain
+Analyzing communities...
+Creating network visualization...
+Saving community analysis to Social_Network_Clustering/results/3k/louvain_0.9t/adj_matrix/louvain_community_analysis.csv...
+Analysis saved successfully
+
+Total processing time: 0.03 hours
+MOF Social Network Clustering completed successfully!

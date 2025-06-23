@@ -1,0 +1,10 @@
+2025-06-23 13:41:22 - mof_pipeline.centrality_analysis - INFO - Logging initialized - log file: /scratch/oms7891/Social_Network_Clustering/logs/centrality_analysis_20250623_134122.log
+2025-06-23 13:41:22 - mof_pipeline.centrality_analysis - INFO - ============================================================
+2025-06-23 13:41:22 - mof_pipeline.centrality_analysis - INFO - Starting: Centrality Analysis
+2025-06-23 13:41:22 - mof_pipeline.centrality_analysis - INFO - Command: python /scratch/oms7891/Social_Network_Clustering/src/../scripts/analysis_centrality.py --adjacency_matrix Social_Network_Clustering/results/3k/louvain_0.9t/adj_matrix/adjacency_matrix_t0.9.pkl --communities_file /scratch/oms7891/Social_Network_Clustering/results/3k/louvain_0.9t/comm_analysis/community_assignments.csv --output_dir /scratch/oms7891/Social_Network_Clustering/results/3k/integrated_analysis_louvain_t0.9
+2025-06-23 13:41:22 - mof_pipeline.centrality_analysis - INFO - Timeout: 6 hours
+2025-06-23 13:41:22 - mof_pipeline.centrality_analysis - INFO - ============================================================
+2025-06-23 13:41:22 - mof_pipeline.centrality_analysis - INFO - Subprocess output will be saved to: /scratch/oms7891/Social_Network_Clustering/logs/centrality_analysis_output_20250623_134122.log
+2025-06-23 13:50:21 - mof_pipeline.centrality_analysis - ERROR - Centrality Analysis failed after 0.15 hours
+2025-06-23 13:50:21 - mof_pipeline.centrality_analysis - ERROR - Error code: 1
+2025-06-23 13:50:21 - mof_pipeline.centrality_analysis - ERROR - Check the subprocess log for detailed error information: /scratch/oms7891/Social_Network_Clustering/logs/centrality_analysis_output_20250623_134122.log

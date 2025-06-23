@@ -1,2 +1,0 @@
-Similarity batches:   0%|          | 0/26 [00:00<?, ?it/s]slurmstepd: error: *** JOB 10922480 ON dn298 CANCELLED AT 2025-06-16T15:50:16 ***
-slurmstepd: error: Detected 4 oom-kill event(s) in StepId=10922480.batch cgroup. Some of your processes may have been killed by the cgroup out-of-memory handler.

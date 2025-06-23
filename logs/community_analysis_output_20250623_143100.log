@@ -1,0 +1,37 @@
+Community Network Analysis for MOF Pipeline
+Adjacency matrix: Social_Network_Clustering/results/3k/louvain_0.9t/adj_matrix/adjacency_matrix_t0.999.pkl
+Data file: Social_Network_Clustering/data/mof_structures_2299.csv
+Output directory: /scratch/oms7891/Social_Network_Clustering/results/3k/louvain_0.9t/comm_analysis
+Resolution: 1.0
+Loading adjacency matrix from Social_Network_Clustering/results/3k/louvain_0.9t/adj_matrix/adjacency_matrix_t0.999.pkl...
+Loaded adjacency matrix with 2,496 edges
+Loading metadata from Social_Network_Clustering/results/3k/louvain_0.9t/adj_matrix/adjacency_matrix_metadata_t0.999.pkl...
+Dataset info: 2,299 nodes, 2,496 edges, threshold=0.999
+Building network graph...
+Adding edges:   0%|          | 0/2496 [00:00<?, ?it/s]Adding edges: 100%|██████████| 2496/2496 [00:00<00:00, 460661.04it/s]
+Network built: 2,299 nodes, 2,496 edges
+Detecting communities using enhanced Louvain algorithm...
+Detected 2139 communities with modularity 0.9988
+Community sizes: min=1, max=19, avg=1.1
+Building inter-community network...
+Processing inter-community edges:   0%|          | 0/2496 [00:00<?, ?it/s]Processing inter-community edges: 100%|██████████| 2496/2496 [00:00<00:00, 1017888.46it/s]
+Community network: 2139 communities, 0 inter-community connections
+Analyzing community properties...
+Analyzing communities:   0%|          | 0/2139 [00:00<?, ?it/s]Analyzing communities:   2%|▏         | 47/2139 [00:00<00:04, 460.93it/s]Analyzing communities:   4%|▍         | 94/2139 [00:00<00:04, 455.12it/s]Analyzing communities:   7%|▋         | 140/2139 [00:00<00:04, 454.43it/s]Analyzing communities:   9%|▊         | 186/2139 [00:00<00:04, 443.98it/s]Analyzing communities:  11%|█         | 232/2139 [00:00<00:04, 448.04it/s]Analyzing communities:  13%|█▎        | 278/2139 [00:00<00:04, 449.53it/s]Analyzing communities:  15%|█▌        | 323/2139 [00:00<00:04, 449.48it/s]Analyzing communities:  17%|█▋        | 369/2139 [00:00<00:03, 452.19it/s]Analyzing communities:  19%|█▉        | 415/2139 [00:00<00:03, 453.61it/s]Analyzing communities:  22%|██▏       | 461/2139 [00:01<00:03, 453.86it/s]Analyzing communities:  24%|██▎       | 507/2139 [00:01<00:03, 454.68it/s]Analyzing communities:  26%|██▌       | 553/2139 [00:01<00:03, 455.73it/s]Analyzing communities:  28%|██▊       | 600/2139 [00:01<00:03, 457.08it/s]Analyzing communities:  30%|███       | 646/2139 [00:01<00:03, 456.63it/s]Analyzing communities:  32%|███▏      | 692/2139 [00:01<00:03, 456.58it/s]Analyzing communities:  35%|███▍      | 738/2139 [00:01<00:03, 456.85it/s]Analyzing communities:  37%|███▋      | 785/2139 [00:01<00:02, 458.11it/s]Analyzing communities:  39%|███▉      | 831/2139 [00:01<00:02, 457.04it/s]Analyzing communities:  41%|████      | 877/2139 [00:01<00:02, 456.98it/s]Analyzing communities:  43%|████▎     | 923/2139 [00:02<00:02, 456.70it/s]Analyzing communities:  45%|████▌     | 969/2139 [00:02<00:02, 455.98it/s]Analyzing communities:  47%|████▋     | 1015/2139 [00:02<00:02, 457.12it/s]Analyzing communities:  50%|████▉     | 1061/2139 [00:02<00:02, 454.47it/s]Analyzing communities:  52%|█████▏    | 1107/2139 [00:02<00:02, 452.60it/s]Analyzing communities:  54%|█████▍    | 1153/2139 [00:02<00:02, 450.72it/s]Analyzing communities:  56%|█████▌    | 1199/2139 [00:02<00:02, 452.87it/s]Analyzing communities:  58%|█████▊    | 1245/2139 [00:02<00:01, 454.24it/s]Analyzing communities:  60%|██████    | 1291/2139 [00:02<00:01, 454.29it/s]Analyzing communities:  63%|██████▎   | 1337/2139 [00:02<00:01, 454.37it/s]Analyzing communities:  65%|██████▍   | 1383/2139 [00:03<00:01, 455.49it/s]Analyzing communities:  67%|██████▋   | 1429/2139 [00:03<00:01, 456.57it/s]Analyzing communities:  69%|██████▉   | 1475/2139 [00:03<00:01, 457.00it/s]Analyzing communities:  71%|███████   | 1521/2139 [00:03<00:01, 457.21it/s]Analyzing communities:  73%|███████▎  | 1567/2139 [00:03<00:01, 457.80it/s]Analyzing communities:  75%|███████▌  | 1613/2139 [00:03<00:01, 457.73it/s]Analyzing communities:  78%|███████▊  | 1659/2139 [00:03<00:01, 454.56it/s]Analyzing communities:  80%|███████▉  | 1705/2139 [00:03<00:00, 455.50it/s]Analyzing communities:  82%|████████▏ | 1751/2139 [00:03<00:00, 455.62it/s]Analyzing communities:  84%|████████▍ | 1797/2139 [00:03<00:00, 455.95it/s]Analyzing communities:  86%|████████▌ | 1843/2139 [00:04<00:00, 455.40it/s]Analyzing communities:  88%|████████▊ | 1889/2139 [00:04<00:00, 455.50it/s]Analyzing communities:  90%|█████████ | 1935/2139 [00:04<00:00, 456.66it/s]Analyzing communities:  93%|█████████▎| 1981/2139 [00:04<00:00, 455.15it/s]Analyzing communities:  95%|█████████▍| 2027/2139 [00:04<00:00, 453.71it/s]Analyzing communities:  97%|█████████▋| 2074/2139 [00:04<00:00, 456.24it/s]Analyzing communities:  99%|█████████▉| 2121/2139 [00:04<00:00, 457.73it/s]Analyzing communities: 100%|██████████| 2139/2139 [00:04<00:00, 455.12it/s]
+Creating network overview visualization...
+Computing layout...
+Network overview saved to /scratch/oms7891/Social_Network_Clustering/results/3k/louvain_0.9t/comm_analysis/network_overview.png
+Creating community network visualization...
+Community network visualization saved to /scratch/oms7891/Social_Network_Clustering/results/3k/louvain_0.9t/comm_analysis/community_network.png
+Creating community analysis plots...
+Community analysis plots saved to /scratch/oms7891/Social_Network_Clustering/results/3k/louvain_0.9t/comm_analysis
+Creating summary report for louvain...
+Summary report saved to /scratch/oms7891/Social_Network_Clustering/results/3k/louvain_0.9t/comm_analysis/summary_report.txt
+
+Community analysis completed successfully!
+Results saved to: /scratch/oms7891/Social_Network_Clustering/results/3k/louvain_0.9t/comm_analysis
+Key outputs:
+  - network_overview.png: Network visualization
+  - community_network.png: Community network visualization
+  - community_assignments.csv: Community assignments
+  - summary_report.txt: Analysis summary

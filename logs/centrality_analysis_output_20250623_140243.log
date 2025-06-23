@@ -1,0 +1,23 @@
+============================================================
+integrated MOF Analysis: Communities + Centrality
+============================================================
+loading data...
+loaded 2299 nodes and 148447 edges
+loaded 39 communities
+caclulating centrality measures...
+caclulating betweenness centrality...
+analyzing community-level centralities...
+Identifying bridge MOFs between communities...
+Identified 2104 bridge MOFs
+Creating comprehensive visualizations...
+Creating comparison report...
+Comprehensive report saved to: /scratch/oms7891/Social_Network_Clustering/results/3k/integrated_analysis_louvain_t0.9/comprehensive_analysis_report.txt
+Saved degree distribution plot.
+exported GEXF for Gephi.
+exported Gephi CSVs for nodes and edges.
+
+============================================================
+Integrated Analysis Complete!
+Results saved to: /scratch/oms7891/Social_Network_Clustering/results/3k/integrated_analysis_louvain_t0.9
+============================================================
+DONE!

@@ -1,0 +1,5 @@
+Loading data from main dataset/selected_data.csv...
+Processing all 258212 MOFs
+Normalizing features...
+Preprocessing complete. Data shape: (258212, 104)
+Similarity batches:   0%|          | 0/26 [00:00<?, ?it/s]

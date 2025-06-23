@@ -77,7 +77,6 @@ class MOFAnalysisController:
         self.centralities['betweenness'] = nx.betweenness_centrality(self.G, k=min(1000, self.G.number_of_nodes()))
          
     def analyze_community_centralities(self):
-        """Analyze and store community-level centralities and representatives."""
         print('analyzing community-level centralities...')
 
         for comm_id in set(self.communities.values()):
@@ -352,3 +351,92 @@ class MOFAnalysisController:
         plt.savefig(os.path.join(self.output_dir, 'comprehensive_analysis.png'), 
                    dpi=300, bbox_inches='tight')
         plt.close()
+
+    def create_comparison_report(self):
+        """Create a comprehensive text report of the analysis results."""
+        print("Creating comparison report...")
+        
+        report_path = os.path.join(self.output_dir, 'comprehensive_analysis_report.txt')
+        
+        with open(report_path, 'w') as f:
+            f.write("=" * 80 + "\n")
+            f.write("MOF NETWORK ANALYSIS - COMPREHENSIVE REPORT\n")
+            f.write("=" * 80 + "\n\n")
+            
+            # Network Overview
+            f.write("NETWORK OVERVIEW\n")
+            f.write("-" * 40 + "\n")
+            f.write(f"Total MOFs: {self.G.number_of_nodes()}\n")
+            f.write(f"Total Edges: {self.G.number_of_edges()}\n")
+            f.write(f"Total Communities: {len(set(self.communities.values()))}\n")
+            f.write(f"Bridge MOFs: {len(self.bridge_mofs)}\n")
+            f.write(f"Network Density: {nx.density(self.G):.4f}\n\n")
+            
+            # Community Analysis
+            f.write("COMMUNITY ANALYSIS\n")
+            f.write("-" * 40 + "\n")
+            if self.community_analysis:
+                community_sizes = [stats['size'] for stats in self.community_analysis.values()]
+                f.write(f"Largest Community Size: {max(community_sizes)}\n")
+                f.write(f"Smallest Community Size: {min(community_sizes)}\n")
+                f.write(f"Average Community Size: {np.mean(community_sizes):.2f}\n")
+                f.write(f"Median Community Size: {np.median(community_sizes):.2f}\n\n")
+                
+                # Top 10 largest communities
+                f.write("TOP 10 LARGEST COMMUNITIES:\n")
+                sorted_communities = sorted(self.community_analysis.items(), 
+                                          key=lambda x: x[1]['size'], reverse=True)[:10]
+                for i, (comm_id, stats) in enumerate(sorted_communities, 1):
+                    f.write(f"{i:2d}. Community {comm_id}: {stats['size']} MOFs, "
+                           f"Representative: {stats['representative_mof']}\n")
+                f.write("\n")
+            
+            # Centrality Analysis
+            f.write("CENTRALITY ANALYSIS\n")
+            f.write("-" * 40 + "\n")
+            
+            # Top degree centrality MOFs
+            f.write("TOP 10 MOFs BY DEGREE CENTRALITY:\n")
+            top_degree = sorted(self.centralities['degree'].items(), 
+                              key=lambda x: x[1], reverse=True)[:10]
+            for i, (mof, centrality) in enumerate(top_degree, 1):
+                community = self.communities.get(mof, "Unknown")
+                f.write(f"{i:2d}. {mof}: {centrality:.4f} (Community {community})\n")
+            f.write("\n")
+            
+            # Top closeness centrality MOFs
+            f.write("TOP 10 MOFs BY CLOSENESS CENTRALITY:\n")
+            top_closeness = sorted(self.centralities['closeness'].items(), 
+                                 key=lambda x: x[1], reverse=True)[:10]
+            for i, (mof, centrality) in enumerate(top_closeness, 1):
+                community = self.communities.get(mof, "Unknown")
+                f.write(f"{i:2d}. {mof}: {centrality:.4f} (Community {community})\n")
+            f.write("\n")
+            
+            # Top betweenness centrality MOFs
+            f.write("TOP 10 MOFs BY BETWEENNESS CENTRALITY:\n")
+            top_betweenness = sorted(self.centralities['betweenness'].items(), 
+                                   key=lambda x: x[1], reverse=True)[:10]
+            for i, (mof, centrality) in enumerate(top_betweenness, 1):
+                community = self.communities.get(mof, "Unknown")
+                f.write(f"{i:2d}. {mof}: {centrality:.4f} (Community {community})\n")
+            f.write("\n")
+            
+            # Bridge MOF Analysis
+            if self.bridge_mofs:
+                f.write("BRIDGE MOF ANALYSIS\n")
+                f.write("-" * 40 + "\n")
+                top_bridges = sorted(self.bridge_mofs.items(), 
+                                   key=lambda x: x[1]['bridge_score'], reverse=True)[:10]
+                f.write("TOP 10 BRIDGE MOFs:\n")
+                for i, (mof, stats) in enumerate(top_bridges, 1):
+                    f.write(f"{i:2d}. {mof}: Bridge Score {stats['bridge_score']}, "
+                           f"Connects {stats['communities_connected']} communities "
+                           f"(from Community {stats['own_community']})\n")
+                f.write("\n")
+            
+            f.write("=" * 80 + "\n")
+            f.write("REPORT COMPLETE\n")
+            f.write("=" * 80 + "\n")
+        
+        print(f"Comprehensive report saved to: {report_path}")

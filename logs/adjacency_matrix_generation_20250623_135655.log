@@ -1,0 +1,9 @@
+2025-06-23 13:56:55 - mof_pipeline.adjacency_matrix_generation - INFO - Logging initialized - log file: /scratch/oms7891/Social_Network_Clustering/logs/adjacency_matrix_generation_20250623_135655.log
+2025-06-23 13:56:55 - mof_pipeline.adjacency_matrix_generation - INFO - ============================================================
+2025-06-23 13:56:55 - mof_pipeline.adjacency_matrix_generation - INFO - Starting: Adjacency Matrix Generation
+2025-06-23 13:56:55 - mof_pipeline.adjacency_matrix_generation - INFO - Command: python /scratch/oms7891/Social_Network_Clustering/src/mof_social_network.py --input Social_Network_Clustering/data/mof_structures_2299.csv --output_dir Social_Network_Clustering/results/3k/louvain_0.9t/adj_matrix --threshold 0.9 --resolution 1.0 --algorithm louvain --save_adjacency
+2025-06-23 13:56:55 - mof_pipeline.adjacency_matrix_generation - INFO - Timeout: 48 hours
+2025-06-23 13:56:55 - mof_pipeline.adjacency_matrix_generation - INFO - ============================================================
+2025-06-23 13:56:55 - mof_pipeline.adjacency_matrix_generation - INFO - Subprocess output will be saved to: /scratch/oms7891/Social_Network_Clustering/logs/adjacency_matrix_generation_output_20250623_135655.log
+2025-06-23 13:58:35 - mof_pipeline.adjacency_matrix_generation - INFO - Adjacency Matrix Generation completed successfully in 0.03 hours
+2025-06-23 13:58:35 - mof_pipeline.adjacency_matrix_generation - INFO - Full output logged to: /scratch/oms7891/Social_Network_Clustering/logs/adjacency_matrix_generation_output_20250623_135655.log
